@@ -1,0 +1,33 @@
+{
+  "name": "chattts-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/small-sunshines/chatTTS-bot.git"
+  },
+  "author": "small-sunshines",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/small-sunshines/chatTTS-bot/issues"
+  },
+  "homepage": "https://github.com/small-sunshines/chatTTS-bot#readme",
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/log4js": "^2.3.5",
+    "@types/tmi.js": "^1.4.0",
+    "@types/ws": "^6.0.1",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5"
+  },
+  "dependencies": {
+    "dotenv": "^8.0.0",
+    "log4js": "^4.3.0",
+    "tmi.js": "^1.4.2",
+    "ws": "^7.0.0"
+  }
+}
