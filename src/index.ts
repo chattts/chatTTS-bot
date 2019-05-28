@@ -1,6 +1,9 @@
 import dotenv from "dotenv"
 import log4js from "log4js"
-import tmi from "tmi.js"
+
+import { default as ChatEvent } from "./chatEvent"
+import { default as Twitch } from "./twitch"
+import { default as WebSocket } from "./websocket"
 
 const logger = log4js.getLogger()
 dotenv.config()
@@ -16,33 +19,45 @@ try {
   logger.level = "DEBUG"
   process.env.NODE_ENV = "development"
 
-  const opts: tmi.Options = {
-    identity: {
-      username: process.env.username,
-      password: process.env.password,
-    },
-    channels: [
-    ],
-    connection: {
-      secure: true,
-    },
-  }
+  const wss = new WebSocket(8080, logger)
+  const twitch = new Twitch(process.env.username!, process.env.password!, logger)
+  const chatEvent = new ChatEvent();
 
-  const client = tmi.client(opts)
+  (async () => {
+    try {
+      wss.ws.on("connection", (socket, request) => {
+        logger.debug(`WS connected`)
+        socket.on("message", (data) => {
+          logger.debug(`received: ${data}`)
+        })
+      })
 
-  client.on("message", (channel, context, msg, self) => {
-    if (self) {
-      return
-    } else {
-      logger.info(`user: ${context["display-name"] || context.username}, where: ${channel}, msg: ${msg}`)
+      twitch.tmi.on("message", (channel, context, msg, self) => {
+        if (self) {
+          return
+        } else {
+          chatEvent.emitEvent(channel, context, msg)
+          logger.info(`user: ${context["display-name"]
+            ? `${context.username}(${context["display-name"]})`
+            : context.username}, where: ${channel}, msg: ${msg}`)
+        }
+      })
+
+      twitch.run().then(([addr, port]) => {
+        logger.info(`Connected to ${addr}:${port}`)
+
+        twitch.tmi.join("#flower0418")
+      }).catch((error) => {
+        logger.error("not connected with twitch server. close the program!")
+        logger.debug(error)
+
+        process.exit(1)
+      })
+    } catch (error) {
+      logger.error(error)
+      process.exit(1)
     }
-  })
-
-  client.on("connected", (addr, port) => {
-    logger.info(`Connected to ${addr}:${port}`)
-  })
-
-  client.connect()
+  })()
 
 } catch (error) {
 // tslint:disable-next-line: no-console
