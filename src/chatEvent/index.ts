@@ -1,5 +1,5 @@
 import EventEmitter from "events"
-import { Userstate } from "tmi.js";
+import { Userstate } from "tmi.js"
 
 declare interface ChatEvent {
   on(event: string | symbol, listener: (context: Userstate, msg: string) => void): this
@@ -11,4 +11,4 @@ class ChatEvent extends EventEmitter {
   }
 }
 
-export default ChatEvent
+export default new ChatEvent()

@@ -1,9 +1,10 @@
 import dotenv from "dotenv"
 import log4js from "log4js"
 
-import { default as ChatEvent } from "./chatEvent"
-import { default as Twitch } from "./twitch"
-import { default as WebSocket } from "./websocket"
+import chatEvent from "./chatEvent"
+import Twitch from "./twitch"
+import User from "./user"
+import WebSocket from "./websocket"
 
 const logger = log4js.getLogger()
 dotenv.config()
@@ -20,16 +21,14 @@ try {
   process.env.NODE_ENV = "development"
 
   const wss = new WebSocket(8080, logger)
-  const twitch = new Twitch(process.env.username!, process.env.password!, logger)
-  const chatEvent = new ChatEvent();
+  const twitch = new Twitch(process.env.username!, process.env.password!, logger);
 
   (async () => {
     try {
       wss.ws.on("connection", (socket, request) => {
-        logger.debug(`WS connected`)
-        socket.on("message", (data) => {
-          logger.debug(`received: ${data}`)
-        })
+        logger.info(`WS connected`)
+
+        new User(socket, twitch.tmi, chatEvent, "chattts", logger).run()
       })
 
       twitch.tmi.on("message", (channel, context, msg, self) => {
@@ -37,9 +36,6 @@ try {
           return
         } else {
           chatEvent.emitEvent(channel, context, msg)
-          logger.info(`user: ${context["display-name"]
-            ? `${context.username}(${context["display-name"]})`
-            : context.username}, where: ${channel}, msg: ${msg}`)
         }
       })
 
