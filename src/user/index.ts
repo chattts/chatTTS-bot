@@ -46,6 +46,8 @@ export default class User {
   public destroy(): void {
     this.logger.info(`DISCONNECT with ${this.channelName} channel`)
     this.tmi.part(`#${this.channelName}`)
+    this.chatEvent.removeAllListeners(`#${this.channelName}`)
+
     return
   }
 
