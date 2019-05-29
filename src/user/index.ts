@@ -22,6 +22,8 @@ export default class User {
     this.channelName = channelName
     this.chatEvent = chatEvent
     this.logger = logger
+
+    this.tmi.join(`#${channelName}`)
   }
 
   public run() {
@@ -31,7 +33,7 @@ export default class User {
 
       this.socket.send(JSON.stringify({
         displayName: username,
-        username,
+        username: context.username,
         message: msg,
       }))
     })
@@ -42,6 +44,8 @@ export default class User {
   }
 
   public destroy(): void {
+    this.logger.info(`DISCONNECT with ${this.channelName} channel`)
+    this.tmi.part(`#${this.channelName}`)
     return
   }
 

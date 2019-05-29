@@ -28,7 +28,8 @@ try {
       wss.ws.on("connection", (socket, request) => {
         logger.info(`WS connected`)
 
-        new User(socket, twitch.tmi, chatEvent, "chattts", logger).run()
+        const twitchUser = new User(socket, twitch.tmi, chatEvent, "flower0418", logger)
+        twitchUser.run()
       })
 
       twitch.tmi.on("message", (channel, context, msg, self) => {
@@ -41,8 +42,6 @@ try {
 
       twitch.run().then(([addr, port]) => {
         logger.info(`Connected to ${addr}:${port}`)
-
-        twitch.tmi.join("#flower0418")
       }).catch((error) => {
         logger.error("not connected with twitch server. close the program!")
         logger.debug(error)
