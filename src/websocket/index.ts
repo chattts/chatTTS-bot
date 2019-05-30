@@ -1,3 +1,4 @@
+import cookie from "cookie"
 import { Logger as Log4js } from "log4js"
 import ws from "ws"
 
@@ -10,7 +11,10 @@ export default class WebSocket {
     this.ws = new ws.Server({
       port,
       verifyClient: (info, done) => {
-        this.logger.debug(info.req.url)
+        const userCookie = cookie.parse(info.req.headers.cookie!)
+
+        this.logger.debug(userCookie.authencation)
+        this.logger.debug(userCookie.twitch)
         done(true)
       },
      })

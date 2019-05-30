@@ -1,3 +1,4 @@
+import cookie from "cookie"
 import dotenv from "dotenv"
 import log4js from "log4js"
 
@@ -10,15 +11,13 @@ const logger = log4js.getLogger()
 dotenv.config()
 
 try {
-  /*if (config.dev === false) {
+  if (process.env.dev === "false") {
     logger.level = "INFO"
     process.env.NODE_ENV = "production"
   } else {
     logger.level = "DEBUG"
     process.env.NODE_ENV = "development"
-  }*/
-  logger.level = "DEBUG"
-  process.env.NODE_ENV = "development"
+  }
 
   const wss = new WebSocket(8080, logger)
   const twitch = new Twitch(process.env.username!, process.env.password!, logger);
@@ -28,8 +27,18 @@ try {
       wss.ws.on("connection", (socket, request) => {
         logger.info(`WS connected`)
 
-        const twitchUser = new User(socket, twitch.tmi, chatEvent, "flower0418", logger)
-        twitchUser.run()
+        const userCookie = cookie.parse(request.headers.cookie!)
+
+        if (userCookie.twitch) {
+          const twitchUser = new User(socket, twitch.tmi, chatEvent, userCookie.twitch, logger)
+          twitchUser.run()
+        } else {
+          socket.send(JSON.stringify({
+            error: true,
+            message: "must set twitch cookie",
+          }))
+          socket.close()
+        }
       })
 
       twitch.tmi.on("message", (channel, context, msg, self) => {
