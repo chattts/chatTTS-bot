@@ -1,6 +1,24 @@
+import axios, { AxiosResponse } from "axios"
 import cookie from "cookie"
 import { Logger as Log4js } from "log4js"
 import ws from "ws"
+
+export interface Token {
+  id: number,
+  username: string,
+  displayName: string,
+  profilePhoto: string,
+  vendor: string,
+  iat: number,
+  exp: number,
+  iss: string,
+  sub: string
+}
+
+export interface Error {
+  valid: false,
+  status: "Please log in"|"Token has expired"
+}
 
 export default class WebSocket {
   public ws: ws.Server
@@ -10,11 +28,35 @@ export default class WebSocket {
     this.logger = logger
     this.ws = new ws.Server({
       port,
-      verifyClient: (info, done) => {
+      verifyClient: async (info, done) => {
         const userCookie = cookie.parse(info.req.headers.cookie!)
 
-        this.logger.debug(userCookie.authencation)
-        this.logger.debug(userCookie.twitch)
+        if (userCookie.isLogin) {
+          const data: AxiosResponse<Token|Error> = await axios({
+            method: "get",
+            url: process.env.checkURL!,
+            headers: {
+              Cookie: `${cookie.serialize("isLogin", "true", {
+                  httpOnly: false,
+                })}; ${cookie.serialize("authorization", userCookie.authorization, {
+                  httpOnly: true,
+                })};`,
+            },
+          })
+
+          if (!(data.data as Error).status) {
+            done(true, 101, "login success")
+            return
+          } else if (!(data.data as Error).status) {
+            done(false, 400, "is not verifyed user")
+            return
+          } else {
+            done(false, 500, "error")
+            return
+          }
+        } else {
+          done(false, 400, "please connect before login")
+        }
         done(true)
       },
      })

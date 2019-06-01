@@ -57,6 +57,10 @@ try {
 
         process.exit(1)
       })
+
+      chatEvent.on("#chattts", (context, msg) => {
+        logger.debug(`#chatTTS: ${context.username}: ${msg}`)
+      })
     } catch (error) {
       logger.error(error)
       process.exit(1)

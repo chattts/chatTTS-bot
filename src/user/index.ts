@@ -1,5 +1,5 @@
 import { Logger } from "log4js"
-import tmi, { Userstate } from "tmi.js"
+import tmi from "tmi.js"
 import WebSocket from "ws"
 import ChatEvent from "../chatEvent"
 
@@ -24,17 +24,20 @@ export default class User {
     this.logger = logger
 
     this.tmi.join(`#${channelName}`)
+    this.logger.info(`CONNECT with ${this.channelName} channel`)
   }
 
   public run() {
     this.chatEvent.on(`#${this.channelName}`, (context, msg) => {
-      const username = this.getUsername(context)
-      this.logger.debug(`user: ${username}, where: ${this.channelName}, msg: ${msg}`)
+      this.logger.debug(`user: ${context.username}, where: ${this.channelName}, msg: ${msg}`)
 
       this.socket.send(JSON.stringify({
-        displayName: username,
+        displayName: context["display-name"],
         username: context.username,
         message: msg,
+        emotes: context.emotes,
+        userType: context["user-type"],
+        badges: context.badges,
       }))
     })
 
@@ -49,11 +52,5 @@ export default class User {
     this.chatEvent.removeAllListeners(`#${this.channelName}`)
 
     return
-  }
-
-  private getUsername(context: Userstate): string {
-    return context["display-name"]
-      ? `${context.username} (${context["display-name"]})`
-      : context.username
   }
 }
