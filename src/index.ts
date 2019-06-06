@@ -20,7 +20,9 @@ try {
   }
 
   const wss = new WebSocket(8080, logger)
-  const twitch = new Twitch(process.env.username!, process.env.password!, logger);
+  const twitch = new Twitch(process.env.username!, process.env.password!, logger)
+
+  const twitchConnectedUser: string[] = [];
 
   (async () => {
     try {
@@ -30,8 +32,20 @@ try {
         const userCookie = cookie.parse(request.headers.cookie!)
 
         if (userCookie.twitch) {
-          const twitchUser = new User(socket, twitch.tmi, chatEvent, userCookie.twitch, logger)
-          twitchUser.run()
+          if (twitchConnectedUser.indexOf(userCookie.twitch) !== -1) {
+            socket.close()
+          } else {
+            twitchConnectedUser.push(userCookie.twitch)
+            const twitchUser = new User({
+              socket,
+              twitchClient: twitch.tmi,
+              chatEvent,
+              channelName: userCookie.twitch,
+              logger,
+              twitchConnectedUser,
+            })
+            twitchUser.run()
+          }
         } else {
           socket.send(JSON.stringify({
             error: true,
