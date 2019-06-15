@@ -65,3 +65,4 @@ typings/
 
 # configure
 .env
+tokens/google.json
