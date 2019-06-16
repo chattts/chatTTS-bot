@@ -1,7 +1,6 @@
 import { Logger } from 'log4js'
 import WebSocket from 'ws'
 import YoutubeChatAPI, { ILiveChatMessage } from 'youtube-chat-api'
-import { GetAccessToken } from '../api'
 
 // tslint:disable-next-line: no-var-requires
 /* const Token = require('../../tokens/google.json')

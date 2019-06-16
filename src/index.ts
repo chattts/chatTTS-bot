@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import log4js from 'log4js'
 import path from 'path'
-import { default as URL } from 'url'
+import querystring from 'querystring'
 
 const logger = log4js.getLogger()
 dotenv.config({
@@ -36,17 +36,19 @@ try {
       wss.ws.on('connection', (socket, request) => {
         logger.info(`WS connected`)
 
-        const url = new URL.URL(request.url || '')
+        const url = querystring.parse(request.url ? request.url.replace('/?', '') : '')
 
-        const queryTwitch = url.searchParams.get('twitch')
-        const queryYoutube = url.searchParams.get('youtube')
+        logger.debug(url)
+
+        const queryTwitch = url.twitch
+        const queryYoutube = url.youtube
 
         if (queryTwitch) {
           const twitchUser = new TwitchUser({
             socket,
             twitchClient: twitch.tmi,
             chatEvent,
-            channelName: queryTwitch,
+            channelName: queryTwitch as string,
             logger,
             twitchConnectedUser,
           })
@@ -56,7 +58,7 @@ try {
         if (queryYoutube) {
           /* const youtubeUser = new YoutubeUser({
             socket,
-            liveChatId: queryYoutube,
+            liveChatId: queryYoutube as string,
             logger,
           }) */
         }

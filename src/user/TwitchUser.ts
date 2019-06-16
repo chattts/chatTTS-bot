@@ -1,6 +1,7 @@
 import { Logger } from 'log4js'
 import tmi, { Userstate } from 'tmi.js'
 import WebSocket from 'ws'
+import { makePacket } from '../api'
 import ChatEvent from '../chatEvent'
 
 export default class TwitchUser {
@@ -50,13 +51,17 @@ export default class TwitchUser {
   private onChat(context: Userstate, msg: string): void {
     this.logger.debug(`user: ${context.username}, where: ${this.channelName}, msg: ${msg}`)
 
-    this.socket.send(JSON.stringify({
-      displayName: context['display-name'],
-      username: context.username,
+    const username = context['display-name'] ?
+      `${context['display-name']} (${context.username})` :
+      context.username
+
+    this.socket.send(makePacket({
+      displayName: username,
       message: msg,
       emotes: context.emotes,
       userType: context['user-type'],
       badges: context.badges,
+      vendor: 'twitch',
     }))
   }
 
