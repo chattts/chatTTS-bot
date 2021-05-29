@@ -23,7 +23,7 @@
     "dotenv": "^8.0.0",
     "log4js": "^4.3.1",
     "tmi.js": "^1.4.2",
-    "ws": "^7.0.0",
+    "ws": "^7.4.6",
     "youtube-chat-api": "^1.0.2"
   },
   "devDependencies": {
